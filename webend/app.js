@@ -3,14 +3,16 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+const socketIO = require('socket.io');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
+var http = require('http')
+const port = process.env.PORT || 3030;
 /* var httpServer = require('http').createServer();
 var io = require("socket.io")(httpServer);
 httpServer.listen(3000); */
 var app = express();
+
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -20,11 +22,12 @@ app.use((req, res, next) => {
   next();
   });
 
-let httpServer= require('http').Server(app);
-var io = require('socket.io')(httpServer, { cors: true });
+var server = require('http').Server(app);
+var io = require('socket.io')(server, {origins:'*:*'});
 
-app.listen(3000);
-io.listen(3031);
+/* 
+io.listen(3010); */
+server.listen(port, () => console.log(`Listening on port ${port}`));
 
 
 
@@ -49,7 +52,7 @@ io.on('connection',  (socket)=>{
 
   socket.disconnect();
 });
-
+/* 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -76,6 +79,6 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
-});
+}); */
 
 module.exports = app;
