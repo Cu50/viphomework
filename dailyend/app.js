@@ -229,18 +229,50 @@ app.get('/vip', function (req, res,next) {
     res.end(result);
   })
 }) 
-app.post('/vip_count', function (req, res,next) {
+app.post('/vip_coupons', function (req, res,next) {
   const vip_name = req.body.vip_name;
-  Vipconnection.query('SELECT vip_count.vip_count_present,vip_count.vip_count from vip_count ,vip_init WHERE vip_init.vip_count>=vip_count.vip_count and vip_name=?',[vip_name],  (err, Result) => {
+  console.log(req.body);
+  Vipconnection.query('SELECT vip_coupons.vip_coupons_id,vip_coupons.vip_coupons_count, vip_coupons.vip_coupons_present FROM vip_coupons,vip_init WHERE vip_coupons.vip_coupons_count <= vip_init.vip_coupons AND vip_init.vip_name =?',[vip_name],  (err, Result) => {
     if (err) throw err
     result=JSON.stringify(Result);
     res.end(result);
   })
 })
-app.post('/vipcountchange', function (req, res, next) {
+app.post('/vipchangecoupons', function (req, res, next) {
   const vip_name = req.body.vip_name;
   const count = req.body.count;
-  Vipconnection.query(`UPDATE vip_init SET vip_count = vip_count - ? WHERE vip_name = ?`,[count,vip_name], (err, Result) => {
+  Vipconnection.query(`UPDATE vip_init SET vip_coupons = vip_coupons - ? WHERE vip_name = ?`,[count,vip_name], (err, Result) => {
+    if (err) throw err
+    result=JSON.stringify(Result);
+    res.send(Result);
+  })
+}) 
+app.post('/vip_coupons_changenumber', function (req, res, next) {
+  const vip_name = req.body.vip_name;
+  const vip_coupons_id = req.body.vip_coupons_id;
+  Vipconnection.query(`UPDATE vip_coupons_number set
+  vip_coupons_number = vip_coupons_number + 1
+  WHERE vip_coupons_number.vip_name= ? && vip_coupons_number.vip_coupons_id= ?`,[vip_name,vip_coupons_id], (err, Result) => {
+    if (err) throw err
+    result=JSON.stringify(Result);
+    res.send(Result);
+  })
+}) 
+app.post('/vip_coupons_number', function (req, res, next) {
+  const vip_name = req.body.vip_name;
+  console.log(vip_name);
+  Vipconnection.query(`SELECT
+	vip_coupons.vip_coupons_id, 
+	vip_coupons_number.vip_coupons_number, 
+	vip_coupons.vip_coupons_present
+FROM
+	vip_coupons_number
+	INNER JOIN
+	vip_coupons
+	ON 
+		vip_coupons_number.vip_coupons_id = vip_coupons.vip_coupons_id
+WHERE
+	vip_coupons_number.vip_name = ?`,[vip_name], (err, Result) => {
     if (err) throw err
     result=JSON.stringify(Result);
     res.send(Result);
