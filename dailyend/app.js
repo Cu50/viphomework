@@ -247,6 +247,15 @@ app.post('/vipchangecoupons', function (req, res, next) {
     res.send(Result);
   })
 }) 
+app.post('/vipaddcoupons', function (req, res, next) {
+  const vip_name = req.body.vip_name;
+  const count = req.body.count;
+  Vipconnection.query(`UPDATE vip_init SET vip_coupons = vip_coupons + ? WHERE vip_name = ?`,[count,vip_name], (err, Result) => {
+    if (err) throw err
+    result=JSON.stringify(Result);
+    res.send(Result);
+  })
+}) 
 app.post('/vip_coupons_changenumber', function (req, res, next) {
   const vip_name = req.body.vip_name;
   const vip_coupons_id = req.body.vip_coupons_id;
@@ -334,7 +343,7 @@ app.post('/viplevelupdate', function (req, res,next) {
 app.post('/vipSelectCourse', function (req, res,next) {
   const vip_name = req.body.vip_name;
   console.log(vip_name);
-  Vipconnection.query(`SELECT lession_id,lession_name,lession_score,teacher_name from lession  NATURAL JOIN teacher where lession_id not in ( SELECT lession_id from vip_course where vip_name = ? ) `,[vip_name], (err, Result) => {
+  Vipconnection.query(`SELECT lession_id,lession_name,lession_score,teacher_name from vip_lession  NATURAL JOIN vip_teacher where lession_id not in ( SELECT lession_id from vip_course where vip_name = ? ) `,[vip_name], (err, Result) => {
     if (err) throw err
     /* result=JSON.stringify(Result); */
     res.send(Result);
@@ -345,7 +354,7 @@ app.post('/vipDeleteCourse', function (req, res,next) {
   Vipconnection.query(`DELETE FROM vip_course WHERE number=?  `,[number], (err, Result) => {
     if (err) throw err
     /* result=JSON.stringify(Result); */
-    res.send(Result);
+    res.send(Result); 
   })
 }) 
 app.post("/vipAddCourse", (req,res) => {
@@ -367,14 +376,13 @@ app.post('/vipCourse', function (req, res,next) {
   Vipconnection.query(`SELECT
 	vip_course.number, 
 	vip_course.lession_id, 
-	lession.lession_name,
-  lession.lession_score
+	vip_lession.lession_name
 FROM
 	vip_course
 	INNER JOIN
-	lession
+	vip_lession
 	ON 
-		vip_course.lession_id = lession.lession_id
+		vip_course.lession_id = vip_lession.lession_id
 		and 
 		vip_name = ?`,[vip_name], (err, Result) => {
     if (err) throw err
